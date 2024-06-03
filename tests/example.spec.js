@@ -1,8 +1,8 @@
 const { test, expect } = require('@playwright/test');
 
-test('open main page and select first tour', async ({ page }) => {
+test('open main page and select random tour', async ({ page }) => {
   try {
-    // устанавливаем общий таймаут для теста на 120 секунд
+    // Устанавливаем общий таймаут для теста на 120 секунд
     test.setTimeout(120000);
 
     await page.goto('https://travelata.ru/');
@@ -11,7 +11,7 @@ test('open main page and select first tour', async ({ page }) => {
     await inputDestination.waitFor();
     await inputDestination.fill('Турция');
 
-    // скрываем перекрывающее окно, если оно есть
+    // Скрываем перекрывающее окно, если оно есть
     await page.evaluate(() => {
       const overlay = document.querySelector('.ui-widget-overlay.custom');
       if (overlay) {
@@ -23,10 +23,10 @@ test('open main page and select first tour', async ({ page }) => {
     await divStartSearch.waitFor();
     await divStartSearch.click();
 
-    // ждем загрузки новой страницы с результатами поиска
-    await page.waitForLoadState('load');
+    // Ждем загрузки новой страницы с результатами поиска
+    await page.waitForNavigation({ waitUntil: 'load' });
 
-    // скрываем перекрывающее окно, если оно есть
+    // Скрываем перекрывающее окно, если оно есть
     await page.evaluate(() => {
       const overlay = document.querySelector('.ui-widget-overlay.custom');
       if (overlay) {
@@ -34,16 +34,37 @@ test('open main page and select first tour', async ({ page }) => {
       }
     });
 
-    // ожидание загрузки результатов поиска и клик по кнопке "Показать туры" в первом туре
-    const firstTourButton = page.locator(".search-result__item button").first();
-    // увеличиваем таймаут до 60 секунд
-    await firstTourButton.waitFor({ timeout: 60000 });
-    await firstTourButton.click();
+    // Ожидание после загрузки страницы, чтобы убедиться, что кнопки загрузились
+    await page.waitForSelector('.button__text-main');
 
-    // ожидание, чтобы можно было увидеть финальный результат
-    await page.waitForTimeout(30000); // оно составляет 30 секунд перед закрытием браузера
+    // Получаем все кнопки с локатором ".button__text-main"
+    const tourButtons = await page.locator(".button__text-main").all();
 
-    // ловим в консоль ошибки, если будут
+    // Проверяем, что найдена хотя бы одна кнопка
+    if (tourButtons.length > 0) {
+      // Выбираем случайную кнопку
+      const randomIndex = Math.floor(Math.random() * tourButtons.length);
+      const randomTourButton = tourButtons[randomIndex];
+
+      // Проверяем, что кнопка видима перед кликом
+      if (await randomTourButton.isVisible()) {
+        await randomTourButton.click();
+
+        // Проверка успешности клика по URL
+        const newPageURL = page.url();
+        console.log(`New page URL: ${newPageURL}`);
+        // Проверка, что URL содержит часть строки
+        expect(newPageURL).toContain('https://travelata.ru/search#?from');
+      } else {
+        console.error('Button is not visible');
+      }
+    } else {
+      console.error('No buttons found with the locator ".button__text-main"');
+    }
+
+    // Установка времени ожидания, чтобы браузер оставался открытым
+    await page.waitForTimeout(30000); // Ожидание 30 секунд перед закрытием браузера
+
   } catch (error) {
     console.error('An error occurred:', error);
   }

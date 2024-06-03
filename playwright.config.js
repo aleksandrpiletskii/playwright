@@ -1,5 +1,5 @@
 // @ts-check
-const { defineConfig, devices } = require('@playwright/test');
+const { devices } = require('@playwright/test');
 
 /**
  * Read environment variables from file.
@@ -10,7 +10,7 @@ const { defineConfig, devices } = require('@playwright/test');
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
-module.exports = defineConfig({
+module.exports = {
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -23,6 +23,7 @@ module.exports = defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  preserveOutput: 'always', // Сохранение вывода (включая браузер) после теста
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
@@ -30,6 +31,14 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     headless: false,
+    viewport: { width: 1280, height: 1200 },
+    ignoreHTTPSErrors: true,
+    video: 'retain-on-failure', // Запись видео, чтобы легче было отлаживать тесты
+    screenshot: 'only-on-failure',
+    launchOptions: {
+      slowMo: 50, // Замедляет действия для лучшей видимости
+    },
+    preserveOutput: 'always', // Сохранение вывода (включая браузер) после теста
   },
 
   /* Configure projects for major browsers */
@@ -76,5 +85,5 @@ module.exports = defineConfig({
   //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: !process.env.CI,
   // },
-});
+};
 
