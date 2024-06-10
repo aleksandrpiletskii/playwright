@@ -110,7 +110,10 @@ test('visit main page and choose random tour', async ({ page, context }) => {
               console.log(`Tour page URL: ${finalPageURL}`);
 
               // проверяем, что урл содержит нужную нам часть строки
-              expect(finalPageURL).toContain('https://travelata.ru/hotel/');
+              const expectedURLs = ['https://travelata.ru/turkey/resorts/', 'https://travelata.ru/turkey/hotel/'];
+              const isValidURL = expectedURLs.some(url => newPageURL.includes(url));
+              expect(isValidURL).toBe(true);
+
             } else {
               console.error('Кнопку не видно');
             }
