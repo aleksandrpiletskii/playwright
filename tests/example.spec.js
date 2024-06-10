@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 test('visit main page and choose random tour', async ({ page, context }) => {
+
   // ставим общий таймаут для теста на 180 секунд
   test.setTimeout(180000);
 
@@ -18,6 +19,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
         overlay.style.display = 'none';
       }
     });
+
     // ищем кнопку поиска и кликаем по ней
     const divStartSearch = page.locator("#startSearch");
     await divStartSearch.waitFor();
@@ -42,6 +44,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
 
     // проверяем, что найдена хотя бы одна кнопка
     if (tourButtons.length > 0) {
+
       // выбираем случайную кнопку
       const randomIndex = Math.floor(Math.random() * tourButtons.length);
       const randomTourButton = tourButtons[randomIndex];
@@ -49,6 +52,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
       // проверим, что кнопка видима перед кликом
       if (await randomTourButton.isVisible()) {
         console.log('Выбираем рандомный тур на серпе');
+
         // ждем появления новой вкладки после клика
         const [newPage] = await Promise.all([
           context.waitForEvent('page', { timeout: 120000 }).catch(() => null), // Увеличение времени ожидания до 120 секунд
@@ -57,6 +61,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
 
         if (newPage) {
           console.log('Ждем загрузку отельной');
+
           // ждем полной загрузки новой вкладки
           await newPage.waitForLoadState('load');
 
@@ -71,6 +76,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
           // проверяем успешность клика по урл
           const newPageURL = newPage.url();
           console.log(`Hotel page URL: ${newPageURL}`);
+
           // проверяем, что урл содержит нужную нам часть строки
           const expectedURLs = ['https://travelata.ru/turkey/resorts/', 'https://travelata.ru/turkey/hotels/'];
           const isValidURL = expectedURLs.some(url => newPageURL.includes(url));
@@ -84,6 +90,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
 
           // проверим, что найдена хотя бы одна кнопка
           if (hotelButtons.length > 0) {
+
             // выбираем случайную кнопку
             const randomHotelIndex = Math.floor(Math.random() * hotelButtons.length);
             const randomHotelButton = hotelButtons[randomHotelIndex];
@@ -91,6 +98,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
             // проверим, что кнопка видима перед кликом
             if (await randomHotelButton.isVisible()) {
               console.log('Выбираем рандомный тур на отельной');
+
               // ждем изменения урл после клика
               await randomHotelButton.click();
 
@@ -100,6 +108,7 @@ test('visit main page and choose random tour', async ({ page, context }) => {
               // проверяем успешность клика по урл
               const finalPageURL = newPage.url();
               console.log(`Tour page URL: ${finalPageURL}`);
+
               // проверяем, что урл содержит нужную нам часть строки
               expect(finalPageURL).toContain('https://travelata.ru/hotel/');
             } else {
@@ -124,6 +133,6 @@ test('visit main page and choose random tour', async ({ page, context }) => {
     await page.waitForTimeout(20000);
 
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.error('Произошла ошибка:', error);
   }
 });
