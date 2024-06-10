@@ -110,9 +110,31 @@ test('visit main page and choose random tour', async ({ page, context }) => {
               console.log(`Tour page URL: ${finalPageURL}`);
 
               // проверяем, что урл содержит нужную нам часть строки
-              const expectedURLs = ['https://travelata.ru/turkey/resorts/', 'https://travelata.ru/turkey/hotel/'];
-              const isValidURL = expectedURLs.some(url => newPageURL.includes(url));
+              const expectedURLs = ['https://travelata.ru/turkey/resorts/', 'https://travelata.ru/turkey/hotels/',
+                'https://travelata.ru/hotel/'];
+              const isValidURL = expectedURLs.some(url => finalPageURL.includes(url));
               expect(isValidURL).toBe(true);
+
+              // Ждем появления кнопок с локатором .routeItem__buttons-content
+              await newPage.waitForSelector('.routeItem__buttons-content');
+
+              // Кликаем на любую доступную кнопку
+              const routeItemButtons = await newPage.locator('.routeItem__buttons-content').first();
+              await routeItemButtons.click();
+
+              // Вводим email и номер телефона
+              const emailField = newPage.locator('input[placeholder="Введите ваш email"]');
+              await emailField.waitFor({ state: 'visible' }); // Добавлено ожидание для email поля
+              await emailField.fill('viv-1995@mail.ru');
+
+              const phoneField = newPage.locator('.basicCustomerInfoInputField__phone');
+              await phoneField.waitFor({ state: 'visible' }); // Добавлено ожидание для phone поля
+              await phoneField.fill('89157710230');
+
+              // Кликаем по кнопке "Перейти к бронированию"
+              const bookButton = newPage.locator('.btnText');
+              await bookButton.waitFor(); // Добавлено ожидание для кнопки бронирования
+              await bookButton.click();
 
             } else {
               console.error('Кнопку не видно');
