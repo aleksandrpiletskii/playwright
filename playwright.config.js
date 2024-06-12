@@ -1,5 +1,6 @@
 // @ts-check
 const { devices } = require('@playwright/test');
+const { defineConfig } = require('@playwright/test');
 
 /**
  * Read environment variables from file.
@@ -10,7 +11,7 @@ const { devices } = require('@playwright/test');
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
-module.exports = {
+module.exports = defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -21,7 +22,10 @@ module.exports = {
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+  ['list'],
+  ['allure-playwright']
+],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   preserveOutput: 'always', // Сохранение вывода (включая браузер) после теста
   use: {
@@ -85,5 +89,5 @@ module.exports = {
   //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: !process.env.CI,
   // },
-};
+});
 
