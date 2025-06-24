@@ -6,46 +6,34 @@ test('booking process', async ({ page, context }) => {
     test.setTimeout(180000);
 
     try {
-        await test.step('Заходим на главную', async () => {
-            await page.goto('https://travelata.ru/');
-        });
+        await page.goto('https://travelata.ru/');
 
-        await test.step('Заполняем поле Куда', async () => {
-            const inputDestination = page.locator("input[name='destination']");
-            await inputDestination.waitFor();
-            await inputDestination.fill('Турция');
-        });
+        const inputDestination = page.locator("input[name='destination']");
+        await inputDestination.waitFor();
+        await inputDestination.fill('Турция');
 
         // скрываем попап, если он есть
-        await test.step('Скрываем попап, если он есть', async () => {
-            await page.evaluate(() => {
-                const overlay = document.querySelector('.ui-widget-overlay.custom');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                }
-            });
+        await page.evaluate(() => {
+            const overlay = document.querySelector('.ui-widget-overlay.custom');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
         });
 
         // ищем кнопку поиска и кликаем по ней
-        await test.step('Кликаем по кнопке поиска', async () => {
-            const divStartSearch = page.locator("#startSearch");
-            await divStartSearch.waitFor();
-            await divStartSearch.click();
-        });
+        const divStartSearch = page.locator("#startSearch");
+        await divStartSearch.waitFor();
+        await divStartSearch.click();
 
         // ждем загрузку СЕРПа с результатами поиска
-        await test.step('Ждем загрузку СЕРПа', async () => {
-            await page.waitForNavigation({ waitUntil: 'load' });
-        });
+        await page.waitForNavigation({ waitUntil: 'load' });
 
         // скрываем попап, если он есть
-        await test.step('Скрываем попап, если он есть', async () => {
-            await page.evaluate(() => {
-                const overlay = document.querySelector('.ui-widget-overlay.custom');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                }
-            });
+        await page.evaluate(() => {
+            const overlay = document.querySelector('.ui-widget-overlay.custom');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
         });
 
         // ждем после загрузки СЕРПа, чтобы убедиться, что кнопки загрузились
@@ -78,13 +66,10 @@ test('booking process', async ({ page, context }) => {
                     await newPage.waitForLoadState('load');
 
                     // скрываем попап на отельной, если он есть
-                    await test.step('Скрываем попап, если он есть', async ({ page }) => {
-                        const popup = await page.$('.popupWithTemplate');
-                        if (popup) {
-                            const button = await popup.$('.priceOrRouteChanged__button');
-                            if (button) {
-                                await button.click();
-                            }
+                    await newPage.evaluate(() => {
+                        const overlay = document.querySelector('.ui-widget-overlay.custom');
+                        if (overlay) {
+                            overlay.style.display = 'none';
                         }
                     });
 
@@ -144,33 +129,27 @@ test('booking process', async ({ page, context }) => {
                             expect(isValidURL).toBe(true);
 
                             // ждем появления кнопок с локатором .routeItem__buttons-content
+                            await newPage.waitForSelector('.routeItem__buttons-content');
+
                             // кликаем на любую доступную кнопку
-                            await test.step('Ждем появления кнопок туров', async ({ page }) => {
-                                await page.waitForSelector('.routeItem__buttons-content');
-                                const routeItemButtons = await page.locator('.routeItem__buttons-content').first();
-                                await routeItemButtons.click();
-                            });
+                            const routeItemButtons = await newPage.locator('.routeItem__buttons-content').first();
+                            await routeItemButtons.click();
 
                             // добавим отладочный вывод после клика
                             console.log('Выбираем рандомный тур на турпейдж');
 
                             // вводим email и номер телефона
-                            await test.step('Заполняем телефон и почту', async ({ page }) => {
-                                const emailField = page.locator('input[placeholder="Введите ваш email"]');
-                                await emailField.waitFor({ state: 'visible' });
-                                await emailField.fill('viv-1995@mail.ru');
+                            const emailField = newPage.locator('input[placeholder="Введите ваш email"]');
+                            await emailField.waitFor({ state: 'visible' }); // ожидание для поля email
+                            await emailField.fill('viv-1995@mail.ru');
 
-                                const phoneField = page.locator('.basicCustomerInfoInputField__phone');
-                                await phoneField.waitFor({ state: 'visible' });
-                                await phoneField.fill('89157710230');
-                            });
+                            const phoneField = newPage.locator('.basicCustomerInfoInputField__phone');
+                            await phoneField.waitFor({ state: 'visible' }); // ожидание для поля phone
+                            await phoneField.fill('89157710230');
 
                             // кликаем по кнопке "Перейти к бронированию"
-                            await test.step('Кликаем по кнопке "Перейти к бронированию"', async ({ page }) => {
-                                const bookButton = page.locator('.btnText');
-                                await bookButton.waitFor();
-                                await bookButton.click();
-                            });
+                            const bookButton = newPage.locator('.btnText');
+                            await bookButton.waitFor(); // ожидание для кнопки бронирования
 
                             console.log('Ждем загрузку чекаута');
                             await newPage.waitForLoadState('domcontentloaded');
@@ -182,11 +161,9 @@ test('booking process', async ({ page, context }) => {
                             ]);
 
                             // проверка урл после перезагрузки страницы
-                            await test.step('Ждем загрузку страницы чекаута', async ({ page }) => {
-                                await page.waitForNavigation({ waitUntil: 'load' });
-                                const paymentURL = page.url();
-                                expect(paymentURL).toContain('https://payment.travelata.ru/quote/checkout');
-                            });
+                            const checkoutPageURL = newPage.url();
+                            console.log(`Checkout page URL: ${checkoutPageURL}`);
+                            expect(checkoutPageURL).toContain('https://payment.travelata.ru/quote/checkout');
 
                         } else {
                             console.error('Кнопку тура на отельной не видно');
@@ -206,7 +183,7 @@ test('booking process', async ({ page, context }) => {
             console.error('Кнопок с локатором ".button__text-main" нет на странице СЕРП');
         }
 
-        // жидание 20 сек, чтобы браузер оставался открытым, чтобы посмотреть на результат
+        // ожидание 20 сек, чтобы браузер оставался открытым, чтобы посмотреть на результат
         await page.waitForTimeout(20000);
 
     } catch (error) {
