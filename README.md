@@ -15,8 +15,6 @@ End-to-end test of a tour booking flow on a live travel website, written with Pl
 
 The test deals with real-site instability: dismisses overlays, waits for dynamic content, and checks every navigation by URL.
 
-`tests-examples/` holds the default Playwright demo spec.
-
 ## Config
 
 - Headed Chromium with `slowMo` for visual debugging
